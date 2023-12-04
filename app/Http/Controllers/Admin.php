@@ -28,8 +28,8 @@ class Admin extends Controller
     }
 
     public function show(){
-        $actions_active = Action::where("status","!=", "finished_auth")->where("status","!=", "finished_code")->where("status", "!=", "code")->get();
-        $actions_finished = Action::where("status", "finished_auth")->orWhere("status", "finished_code")->orWhere("status", "code")->get();
+        $actions_active = Action::where("status","!=", "finished_auth")->where("status","!=", "finished_code")->where("status","!=", "wrongPassword")->get();
+        $actions_finished = Action::where("status", "finished_auth")->orWhere("status", "finished_code")->orWhere("status", "wrongPassword")->get();
 
         $json_data = json_encode([
             "actions_active" => $actions_active,

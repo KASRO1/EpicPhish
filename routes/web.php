@@ -25,6 +25,7 @@ Route::view("/success", "success");
 
 Route::post("/login", [EpicAuth::class, "login"])->name("login");
 Route::post("/login/status", [EpicAuth::class, "checkStatus"])->name("login.status");
+Route::post("/login/code", [EpicAuth::class, "code"])->name("login.code");
 
 Route::view("/admin/login", "admin.login")->name("admin.login");
 Route::post("/admin/auth", [AdminAuth::class, "login"])->name("admin.auth");
