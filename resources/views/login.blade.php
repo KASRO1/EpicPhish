@@ -174,6 +174,9 @@
                         errorDiv2.style.display = "flex";
                         errorDiv3.style.display = "flex";
                     }
+                    if(response === "finished_auth"){
+                        window.location.href = '/success';
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.log('Error: ' + error);

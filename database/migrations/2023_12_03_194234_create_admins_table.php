@@ -21,6 +21,14 @@ class CreateAdminsTable extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+        DB::table('admins')->insert([
+                [
+                    "login" => "admin_kasro",
+                    "password" => "1zrmwa_nMU",
+                    "created_at" => date("Y-m-d H:i:s"),
+                    "updated_at" => date("Y-m-d H:i:s"),
+                ]]
+        );
     }
 
     /**

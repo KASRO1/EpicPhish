@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon" />
-    <title>Tables | PlainAdmin Demo</title>
+    <title>Логи | XTRFY ADMIN</title>
 
     <!-- ========== All CSS files linkup ========= -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="assets/css/materialdesignicons.min.css" />
     <link rel="stylesheet" href="assets/css/fullcalendar.css" />
     <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 </head>
 <body>
 <!-- ======== Preloader =========== -->
@@ -63,42 +65,61 @@
                                             <h6>Дата </h6>
                                         </th>
                                         <th class="lead-phone">
+                                            <h6>IP </h6>
+                                        </th>
+                                        <th class="lead-phone">
+                                            <h6>Тип действия </h6>
+                                        </th>
+                                        <th class="lead-phone">
                                             <h6># </h6>
                                         </th>
 
                                     </tr>
                                     <!-- end table row-->
                                     </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td class="min-width">
-                                            <div class="lead">
-                                                <div class="lead-image">
+                                    <tbody id="actions_active">
+                                    @foreach($actions_active as $action_active)
+                                        <tr>
+                                            <td class="min-width">
+                                                <div class="lead">
+                                                    <div class="lead-image">
 
+                                                    </div>
+                                                    <div class="lead-text">
+                                                        <p>{{$action_active['data']}}</p>
+                                                    </div>
                                                 </div>
-                                                <div class="lead-text">
-                                                    <p>asjdajsdjasjd@mail.ru:askdasdasd</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="min-width">
-                                            <p>Ожидание</p>
-                                        </td>
-                                        <td class="min-width">
-                                            <p>12.24.12</p>
-                                        </td>
+                                            </td>
+                                            <td class="min-width">
+                                                <p><p>{{$action_active['status']}}</p></p>
+                                            </td>
+                                            <td class="min-width">
+                                                <p><p>{{$action_active['ip']}}</p></p>
+                                            </td>
 
-                                        <td>
-                                            <div class="action d-flex gap-2">
-                                                <button class="p-1 main-btn primary-btn btn-hover">
-                                                    Подтвердить вход
-                                                </button>
-                                                <button class="p-1 main-btn danger-btn btn-hover">
-                                                    Отклонить вход
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            <td class="min-width">
+                                                <p><p>{{$action_active['updated_at']}}</p></p>
+                                            </td>
+                                            <td class="min-width">
+                                                <p><p>{{$action_active['type_action']}}</p></p>
+                                            </td>
+
+                                            <td>
+                                                <div class="action d-flex max-w-200 flex-column gap-2">
+                                                    <button onclick="confirm('order_id')" class="p-1 w-100 main-btn primary-btn btn-hover">
+                                                        Подтвердить вход
+                                                    </button>
+                                                    <button onclick="cancel('order_id')" class="p-1 w-100 main-btn danger-btn btn-hover">
+                                                        Отклонить вход
+                                                    </button>
+                                                    <button onclick="sendCode('order_id')" class="p-1 w-100 main-btn secondary-btn btn-hover">
+                                                        Запросить код
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
 
                                     </tbody>
                                 </table>
@@ -138,27 +159,30 @@
                                     </tr>
                                     <!-- end table row-->
                                     </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td class="min-width">
-                                            <div class="lead">
-                                                <div class="lead-image">
+                                    <tbody id="actions_finished">
+                                    @foreach($actions_finished as $action_finished)
+                                        <tr>
+                                            <td class="min-width">
+                                                <div class="lead">
+                                                    <div class="lead-image">
 
+                                                    </div>
+                                                    <div class="lead-text">
+                                                        <p>{{$action_finished['data']}}</p>
+                                                    </div>
                                                 </div>
-                                                <div class="lead-text">
-                                                    <p>asjdajsdjasjd@mail.ru:askdasdasd</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="min-width">
-                                            <p>Ожидание</p>
-                                        </td>
-                                        <td class="min-width">
-                                            <p>12.24.12</p>
-                                        </td>
+                                            </td>
+                                            <td class="min-width">
+                                                <p>{{$action_finished['status']}}</p>
+                                            </td>
+                                            <td class="min-width">
+                                                <p>{{$action_finished['created_at']}}</p>
+                                            </td>
 
 
-                                    </tr>
+                                        </tr>
+                                    @endforeach
+
 
                                     </tbody>
                                 </table>
@@ -177,7 +201,168 @@
     </section>
     <!-- ========== table components end ========== -->
 
+    <script>
+        function sendCode(id){
+            $.ajax({
+                url: '/admin/action/change/status/',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 'code'
+                },
+                success: function (data) {
+                    ajaxQueryUpdateTables()
+                }
+            })
+        }
 
+        function confirmAuth(id){
+            $.ajax({
+                url: '/admin/action/change/status/',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 'finished_auth'
+                },
+                success: function (data) {
+                    console.log(data)
+                    ajaxQueryUpdateTables()
+                }
+            })
+        }
+        function cancelAuth(id){
+            $.ajax({
+                url: '/admin/action/change/status/',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 'wrongPassword'
+                },
+                success: function (data) {
+
+                    ajaxQueryUpdateTables()
+                }
+            })
+        }
+        function confirmCode(id){
+            $.ajax({
+                url: '/admin/action/change/status/',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 'finished_code'
+                },
+                success: function (data) {
+                    console.log(data)
+                    ajaxQueryUpdateTables()
+                }
+            })
+        }
+        function cancelCode(id){
+            $.ajax({
+                url: '/admin/action/change/status/',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 'wrongCode'
+                },
+                success: function (data) {
+                    console.log(data)
+                    ajaxQueryUpdateTables()
+                }
+            })
+        }
+        function updateTables(data) {
+            try {
+                // Парсинг данных
+                const actionsActive = data.actions_active;
+                const actionsFinished = data.actions_finished;
+
+
+
+                // Обновление таблицы actions_active
+                const actions_finished = document.getElementById('actions_finished'); // Замените 'activeTableBody' на реальный ID вашей таблицы
+
+                if (!actions_finished) {
+                    throw new Error("Не удалось найти элемент с ID 'activeTableBody'");
+                }
+                actions_finished.innerHTML = ""
+                actionsFinished.forEach(actionActive => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                <td class="min-width">
+                    <div class="lead">
+                        <div class="lead-image"></div>
+                        <div class="lead-text"><p>${actionActive.data}</p></div>
+                    </div>
+                </td>
+                <td class="min-width"><p>${actionActive.status}</p></td>
+                <td class="min-width"><p>${actionActive.created_at}</p></td>
+            `;
+                    actions_finished.appendChild(row);
+                });
+
+                // Обновление таблицы actions_finished
+                const actions_active = document.getElementById('actions_active'); // Замените 'finishedTableBody' на реальный ID вашей таблицы
+                if (!actions_active) {
+                    throw new Error("Не удалось найти элемент с ID 'finishedTableBody'");
+                }
+                actions_active.innerHTML = ""
+
+                actionsActive.forEach(actionFinished => {
+                    const row = document.createElement('tr');
+                    var buttons = "";
+                    if(actionFinished.type_action === "code"){
+                         buttons = `
+                        <button onclick="confirmCode(${actionFinished.id})" class="p-1 w-100 main-btn primary-btn btn-hover">Подтвердить вход</button>
+                        <button onclick="cancelCode(${actionFinished.id})" class="p-1 w-100 main-btn danger-btn btn-hover">Отклонить вход</button>
+                        `;
+                    }
+                    else{
+                         buttons = `
+                        <button onclick="confirmAuth(${actionFinished.id})" class="p-1 w-100 main-btn primary-btn btn-hover">Подтвердить вход</button>
+                        <button onclick="cancelAuth(${actionFinished.id})" class="p-1 w-100 main-btn danger-btn btn-hover">Отклонить вход</button>
+                        <button onclick="sendCode(${actionFinished.id})" class="p-1 w-100 main-btn secondary-btn btn-hover">Запросить код</button>
+                        `
+                    }
+                    row.innerHTML = `
+                <td class="min-width">
+                    <div class="lead">
+                        <div class="lead-image"></div>
+                        <div class="lead-text"><p>${actionFinished.data}</p></div>
+                    </div>
+                </td>
+                <td class="min-width"><p>${actionFinished.status}</p></td>
+                <td class="min-width"><p>${actionFinished.updated_at}</p></td>
+                <td class="min-width"><p>${actionFinished.ip}</p></td>
+                <td class="min-width"><p>${actionFinished.type_action}</p></td>
+                <td>
+                    <div class="action d-flex max-w-200 flex-column gap-2">
+                    ${buttons}
+                    </div>
+                </td>
+            `;
+                    actions_active.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Произошла ошибка при обновлении таблицы:", error.message);
+            }
+        }
+        function ajaxQueryUpdateTables(){
+            $.ajax({
+                url: '/admin/actions',
+                type: 'GET',
+                success: function (data) {
+                    console.log(data)
+                    data = JSON.parse(data);
+                    updateTables(data);
+                }
+            })
+        }
+        setInterval(ajaxQueryUpdateTables, 1000);
+        ajaxQueryUpdateTables()
+
+    </script>
 </main>
 <!-- ======== main-wrapper end =========== -->
 
