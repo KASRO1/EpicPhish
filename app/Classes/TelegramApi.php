@@ -13,6 +13,7 @@ class TelegramApi
         $params = [
             'chat_id' => env("TELEGRAM_CHAT_ID"),
             'text' => $text,
+
         ];
 
         $ch = curl_init();
